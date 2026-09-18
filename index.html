@@ -1,0 +1,1089 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f7f1e8">
+  <meta name="description" content="把一句想说的话藏进消消乐里，消除完成后再揭晓。">
+  <title>藏话消消乐</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23f7f1e8'/%3E%3Cpath d='M16 26S5 19.5 5 11.8C5 8.2 7.6 6 10.8 6c2.2 0 4 1.2 5.2 3 1.2-1.8 3-3 5.2-3C24.4 6 27 8.2 27 11.8 27 19.5 16 26 16 26Z' fill='%23e65353'/%3E%3C/svg%3E">
+  <style>
+    :root {
+      --paper: #f7f1e8;
+      --ink: #202632;
+      --muted: #6f746f;
+      --line: #d8d0c5;
+      --red: #e65353;
+      --teal: #2a9d96;
+      --gold: #e3ae35;
+      --blue: #4f6fd3;
+      --green: #5cab7d;
+      --pink: #d96f9b;
+      --white: #fffdf9;
+      --shadow: 0 18px 48px rgba(42, 35, 28, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      min-height: 100%;
+      background: var(--paper);
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      min-height: 100svh;
+      color: var(--ink);
+      font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      background:
+        linear-gradient(90deg, rgba(32, 38, 50, 0.035) 1px, transparent 1px),
+        linear-gradient(rgba(32, 38, 50, 0.035) 1px, transparent 1px),
+        var(--paper);
+      background-size: 24px 24px;
+      letter-spacing: 0;
+    }
+
+    button, input { font: inherit; }
+
+    button {
+      border: 0;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    button:focus-visible,
+    input:focus-visible {
+      outline: 3px solid rgba(79, 111, 211, 0.35);
+      outline-offset: 2px;
+    }
+
+    [hidden] { display: none !important; }
+
+    .app {
+      width: min(100%, 520px);
+      min-height: 100vh;
+      min-height: 100svh;
+      margin: 0 auto;
+      background: rgba(255, 253, 249, 0.86);
+      border-inline: 1px solid rgba(32, 38, 50, 0.08);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .screen {
+      min-height: 100vh;
+      min-height: 100svh;
+      padding: max(24px, env(safe-area-inset-top)) 22px max(26px, env(safe-area-inset-bottom));
+      display: flex;
+      flex-direction: column;
+    }
+
+    .creator-screen,
+    .intro-screen,
+    .result-screen {
+      justify-content: center;
+    }
+
+    .brand-mark {
+      width: 74px;
+      height: 74px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 28px;
+      background: var(--ink);
+      border: 5px solid var(--white);
+      border-radius: 8px;
+      box-shadow: 8px 8px 0 var(--gold);
+      transform: rotate(-3deg);
+    }
+
+    .brand-mark svg { width: 44px; height: 44px; }
+
+    h1, h2, p { margin-top: 0; }
+
+    h1 {
+      margin-bottom: 12px;
+      font-size: clamp(2rem, 9vw, 3.2rem);
+      line-height: 1.08;
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    .lead {
+      margin-bottom: 30px;
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.75;
+    }
+
+    .field { margin-bottom: 18px; }
+
+    .field label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+      font-weight: 750;
+    }
+
+    .field input {
+      width: 100%;
+      min-height: 52px;
+      padding: 13px 14px;
+      color: var(--ink);
+      background: var(--white);
+      border: 2px solid var(--ink);
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+
+    .field-note {
+      margin: 7px 0 0;
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+
+    .primary,
+    .secondary,
+    .text-button {
+      min-height: 52px;
+      border-radius: 6px;
+      font-weight: 800;
+      transition: transform 150ms ease, box-shadow 150ms ease;
+    }
+
+    .primary {
+      width: 100%;
+      padding: 14px 18px;
+      color: white;
+      background: var(--red);
+      border: 2px solid var(--ink);
+      box-shadow: 5px 5px 0 var(--ink);
+    }
+
+    .secondary {
+      width: 100%;
+      padding: 14px 18px;
+      color: var(--ink);
+      background: var(--white);
+      border: 2px solid var(--ink);
+    }
+
+    .text-button {
+      min-height: 44px;
+      padding: 8px 10px;
+      color: var(--ink);
+      background: transparent;
+      text-decoration: underline;
+      text-underline-offset: 4px;
+    }
+
+    .primary:active,
+    .secondary:active { transform: translate(3px, 3px); box-shadow: 2px 2px 0 var(--ink); }
+
+    .button-stack {
+      display: grid;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .share-ready {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid var(--line);
+    }
+
+    .share-ready strong {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 1.05rem;
+    }
+
+    .share-ready p {
+      margin-bottom: 14px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    .mini-board {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 7px;
+      width: 190px;
+      margin-bottom: 26px;
+      transform: rotate(2deg);
+    }
+
+    .mini-board span {
+      aspect-ratio: 1;
+      display: grid;
+      place-items: center;
+      color: white;
+      border: 2px solid var(--ink);
+      border-radius: 5px;
+      font-size: 1.15rem;
+      font-weight: 900;
+      box-shadow: 2px 2px 0 var(--ink);
+    }
+
+    .mini-board span:nth-child(6n+1) { background: var(--red); }
+    .mini-board span:nth-child(6n+2) { background: var(--teal); }
+    .mini-board span:nth-child(6n+3) { background: var(--gold); }
+    .mini-board span:nth-child(6n+4) { background: var(--blue); }
+    .mini-board span:nth-child(6n+5) { background: var(--green); }
+    .mini-board span:nth-child(6n) { background: var(--pink); }
+
+    .intro-kicker,
+    .result-kicker {
+      margin-bottom: 10px;
+      color: var(--red);
+      font-size: 0.82rem;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .intro-title,
+    .result-title {
+      margin-bottom: 14px;
+      font-size: clamp(2rem, 9vw, 3rem);
+      line-height: 1.12;
+      font-weight: 900;
+    }
+
+    .intro-copy {
+      margin-bottom: 28px;
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.75;
+    }
+
+    .game-screen {
+      min-height: 100vh;
+      min-height: 100svh;
+      justify-content: flex-start;
+    }
+
+    .game-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .game-title {
+      margin: 0;
+      font-size: 1.2rem;
+      font-weight: 900;
+    }
+
+    .reset-button {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      color: var(--ink);
+      background: var(--white);
+      border: 2px solid var(--ink);
+      border-radius: 6px;
+      font-size: 1.25rem;
+      font-weight: 900;
+    }
+
+    .reset-button span { transform: translateY(-1px); }
+
+    .progress-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .progress-track {
+      height: 12px;
+      overflow: hidden;
+      background: #ded8cf;
+      border: 2px solid var(--ink);
+      border-radius: 4px;
+    }
+
+    .progress-fill {
+      width: 0%;
+      height: 100%;
+      background: var(--teal);
+      transition: width 260ms ease;
+    }
+
+    .progress-text {
+      min-width: 58px;
+      text-align: right;
+      font-size: 0.82rem;
+      font-weight: 850;
+    }
+
+    .board-wrap {
+      width: 100%;
+      max-width: 440px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .board {
+      width: 100%;
+      aspect-ratio: 1;
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: clamp(4px, 1.4vw, 7px);
+      padding: clamp(7px, 2vw, 11px);
+      background: #d9d2c8;
+      border: 3px solid var(--ink);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .tile {
+      position: relative;
+      min-width: 0;
+      aspect-ratio: 1;
+      display: grid;
+      place-items: center;
+      color: white;
+      border: 2px solid var(--ink);
+      border-radius: 7px;
+      box-shadow: 2px 2px 0 rgba(32, 38, 50, 0.82);
+      font-size: clamp(1rem, 5.5vw, 1.7rem);
+      font-weight: 900;
+      line-height: 1;
+      transition: transform 130ms ease, opacity 180ms ease, box-shadow 130ms ease;
+    }
+
+    .tile[data-type="0"] { background: var(--red); }
+    .tile[data-type="1"] { background: var(--teal); }
+    .tile[data-type="2"] { background: var(--gold); color: var(--ink); }
+    .tile[data-type="3"] { background: var(--blue); }
+    .tile[data-type="4"] { background: var(--green); }
+    .tile[data-type="5"] { background: var(--pink); }
+
+    .tile.selected {
+      transform: translate(-2px, -2px) scale(1.07);
+      box-shadow: 5px 5px 0 var(--ink);
+      z-index: 2;
+    }
+
+    .tile.matched {
+      pointer-events: none;
+      z-index: 3;
+      animation: tileClear 460ms cubic-bezier(0.22, 0.9, 0.32, 1) forwards;
+    }
+
+    .tile.matched::after {
+      content: "♥";
+      position: absolute;
+      inset: 50% auto auto 50%;
+      color: white;
+      font-size: 1.2em;
+      line-height: 1;
+      text-shadow: 0 2px 0 rgba(32, 38, 50, 0.35);
+      pointer-events: none;
+      animation: heartBurst 460ms ease-out forwards;
+    }
+
+    .tile.removed {
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.25);
+      box-shadow: none;
+    }
+
+    .board.shake { animation: shake 260ms ease; }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      75% { transform: translateX(6px); }
+    }
+
+    @keyframes tileClear {
+      0% { transform: scale(1); opacity: 1; filter: brightness(1); }
+      34% { transform: translateY(-5px) scale(1.16) rotate(-4deg); opacity: 1; filter: brightness(1.25); }
+      58% { transform: translateY(-3px) scale(1.08) rotate(4deg); opacity: 1; filter: brightness(1.12); }
+      100% { transform: scale(0.18) rotate(12deg); opacity: 0; filter: brightness(1.2); }
+    }
+
+    @keyframes heartBurst {
+      0% { transform: translate(-50%, -35%) scale(0.2); opacity: 0; }
+      30% { transform: translate(-50%, -75%) scale(1.15); opacity: 1; }
+      100% { transform: translate(-50%, -155%) scale(0.72); opacity: 0; }
+    }
+
+    .game-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 16px;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .moves {
+      color: var(--ink);
+      font-weight: 900;
+    }
+
+    .result-screen {
+      justify-content: flex-start;
+      position: relative;
+      color: var(--ink);
+      background: #fff8f6;
+      text-align: center;
+    }
+
+    .result-screen > :not(.petal-layer):not(.rose-decor) {
+      position: relative;
+      z-index: 2;
+    }
+
+    .result-screen::before {
+      content: "♥";
+      width: 48px;
+      height: 48px;
+      display: grid;
+      place-items: center;
+      margin: 8vh auto 22px;
+      color: white;
+      background: #c94f5d;
+      border-radius: 50%;
+      box-shadow: 0 8px 24px rgba(156, 55, 70, 0.18);
+      font-size: 1.35rem;
+      animation: heartBreathe 2.6s ease-in-out infinite;
+    }
+
+    .rose-decor {
+      position: absolute;
+      z-index: 1;
+      top: max(22px, env(safe-area-inset-top));
+      color: #b94455;
+      font-size: 2.35rem;
+      line-height: 1;
+      filter: drop-shadow(0 6px 8px rgba(129, 47, 58, 0.14));
+      pointer-events: none;
+      transform-origin: 50% 100%;
+    }
+
+    .rose-left {
+      left: 18px;
+      animation: roseSwayLeft 3.8s ease-in-out infinite;
+    }
+
+    .rose-right {
+      right: 18px;
+      animation: roseSwayRight 4.2s ease-in-out infinite;
+    }
+
+    .petal-layer {
+      position: absolute;
+      z-index: 0;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .petal-layer span {
+      position: absolute;
+      top: -10%;
+      left: var(--x);
+      width: var(--size);
+      height: calc(var(--size) * 1.35);
+      background: var(--petal);
+      border-radius: 75% 25% 70% 30%;
+      opacity: 0;
+      animation: petalFall var(--duration) linear infinite;
+      animation-delay: var(--delay);
+    }
+
+    .petal-layer span:nth-child(1) { --x: 7%; --size: 8px; --duration: 8s; --delay: -2s; --petal: #d85a6b; }
+    .petal-layer span:nth-child(2) { --x: 19%; --size: 6px; --duration: 10s; --delay: -7s; --petal: #ef9ba4; }
+    .petal-layer span:nth-child(3) { --x: 34%; --size: 7px; --duration: 9s; --delay: -4s; --petal: #c94f5d; }
+    .petal-layer span:nth-child(4) { --x: 51%; --size: 6px; --duration: 11s; --delay: -8s; --petal: #e7828d; }
+    .petal-layer span:nth-child(5) { --x: 67%; --size: 8px; --duration: 9.5s; --delay: -1s; --petal: #d85a6b; }
+    .petal-layer span:nth-child(6) { --x: 82%; --size: 6px; --duration: 10.5s; --delay: -5s; --petal: #ef9ba4; }
+    .petal-layer span:nth-child(7) { --x: 93%; --size: 7px; --duration: 8.5s; --delay: -6s; --petal: #c94f5d; }
+
+    .result-screen:not([hidden]) .result-kicker { animation: resultRise 520ms 100ms both; }
+    .result-screen:not([hidden]) .result-title { animation: resultRise 520ms 180ms both; }
+    .result-screen:not([hidden]) .result-message { animation: resultRise 640ms 280ms both; }
+    .result-screen:not([hidden]) .result-message span { animation: resultLine 480ms both; }
+    .result-screen:not([hidden]) .result-message span:nth-child(1) { animation-delay: 430ms; }
+    .result-screen:not([hidden]) .result-message span:nth-child(2) { animation-delay: 550ms; }
+    .result-screen:not([hidden]) .result-message span:nth-child(3) { animation-delay: 670ms; }
+    .result-screen:not([hidden]) .result-note { animation: resultRise 520ms 420ms both; }
+    .result-screen:not([hidden]) .button-stack { animation: resultRise 520ms 520ms both; }
+
+    @keyframes heartBreathe {
+      0%, 100% { transform: scale(1); box-shadow: 0 8px 24px rgba(156, 55, 70, 0.18); }
+      50% { transform: scale(1.07); box-shadow: 0 10px 30px rgba(156, 55, 70, 0.28); }
+    }
+
+    @keyframes roseSwayLeft {
+      0%, 100% { transform: rotate(-18deg); }
+      50% { transform: rotate(-10deg) translateY(-3px); }
+    }
+
+    @keyframes roseSwayRight {
+      0%, 100% { transform: scaleX(-1) rotate(-18deg); }
+      50% { transform: scaleX(-1) rotate(-10deg) translateY(-3px); }
+    }
+
+    @keyframes petalFall {
+      0% { transform: translate3d(0, -5vh, 0) rotate(0deg); opacity: 0; }
+      12% { opacity: 0.55; }
+      75% { opacity: 0.38; }
+      100% { transform: translate3d(34px, 112vh, 0) rotate(520deg); opacity: 0; }
+    }
+
+    @keyframes resultRise {
+      from { transform: translateY(18px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    @keyframes resultLine {
+      from { transform: translateY(10px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .result-kicker {
+      margin-bottom: 8px;
+      color: #a13f4d;
+      font-size: 0.78rem;
+      font-weight: 800;
+    }
+
+    .result-title {
+      margin-bottom: 22px;
+      color: #765f62;
+      font-size: 1rem;
+      line-height: 1.5;
+      font-weight: 600;
+    }
+
+    .result-message {
+      width: 100%;
+      margin: 0 0 24px;
+      padding: 28px 8px 30px;
+      color: var(--ink);
+      border-block: 1px solid #e7cfd0;
+      font-family: "Songti SC", "STSong", "Noto Serif CJK SC", serif;
+      font-size: clamp(1.55rem, 7vw, 2.15rem);
+      line-height: 1.62;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .result-message span { display: block; }
+
+    .result-message span:first-child {
+      margin-bottom: 5px;
+      color: #a13f4d;
+      font-size: 0.72em;
+    }
+
+    .result-note {
+      margin: 0 auto 24px;
+      color: #786b6d;
+      font-size: 0.88rem;
+      line-height: 1.7;
+    }
+
+    .result-screen .button-stack { margin-top: auto; }
+
+    .result-screen .primary {
+      color: white;
+      background: #c94f5d;
+      border-color: #c94f5d;
+      box-shadow: 4px 4px 0 #efb7b8;
+    }
+
+    .result-screen .secondary {
+      color: var(--ink);
+      background: #fffdfb;
+      border-color: #c9b8b8;
+    }
+
+    .result-screen .text-button { color: #765f62; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .result-screen::before,
+      .rose-decor,
+      .petal-layer span,
+      .result-screen:not([hidden]) .result-kicker,
+      .result-screen:not([hidden]) .result-title,
+      .result-screen:not([hidden]) .result-message,
+      .result-screen:not([hidden]) .result-message span,
+      .result-screen:not([hidden]) .result-note,
+      .result-screen:not([hidden]) .button-stack {
+        animation: none;
+      }
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: max(24px, env(safe-area-inset-bottom));
+      z-index: 20;
+      max-width: calc(100vw - 40px);
+      padding: 12px 16px;
+      color: white;
+      background: var(--ink);
+      border: 2px solid white;
+      border-radius: 6px;
+      box-shadow: 4px 4px 0 var(--red);
+      transform: translate(-50%, 18px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 180ms ease, transform 180ms ease;
+      font-size: 0.88rem;
+      font-weight: 750;
+      text-align: center;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+
+    @media (min-width: 720px) {
+      body { padding-block: 28px; }
+      .app {
+        min-height: calc(100vh - 56px);
+        border: 2px solid var(--ink);
+        border-radius: 8px;
+        box-shadow: 12px 12px 0 rgba(32, 38, 50, 0.12);
+      }
+      .screen {
+        min-height: calc(100vh - 60px);
+        padding-inline: 40px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 1ms !important;
+        transition-duration: 1ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app" id="app">
+    <section class="screen creator-screen" id="creatorScreen">
+      <div class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 48 48" role="img">
+          <path d="M24 39S8 29.7 8 18.4C8 13.2 11.8 10 16.4 10c3.2 0 5.8 1.8 7.6 4.4 1.8-2.6 4.4-4.4 7.6-4.4 4.6 0 8.4 3.2 8.4 8.4C40 29.7 24 39 24 39Z" fill="#e65353"/>
+          <path d="M14 20h20M18 14v20M30 14v20M14 28h20" stroke="#fffdf9" stroke-width="2.4"/>
+        </svg>
+      </div>
+      <h1>藏一句话<br>等 TA 消出来</h1>
+      <p class="lead">把想说的话放进关卡里，生成一局专属消消乐。</p>
+
+      <div class="field">
+        <label for="messageInput">最后出现的话</label>
+        <input id="messageInput" maxlength="24" value="李品月 我爱你 我们是夫妻 我绝对会娶你" autocomplete="off">
+        <p class="field-note">最多 24 个字，短一点更有惊喜。</p>
+      </div>
+      <div class="field">
+        <label for="nameInput">怎么称呼 TA</label>
+        <input id="nameInput" maxlength="8" value="李品月" autocomplete="off">
+      </div>
+
+      <button class="primary" id="createButton">生成专属游戏</button>
+
+      <div class="share-ready" id="shareReady" hidden>
+        <strong>游戏已经藏好了</strong>
+        <p>把链接发给 TA，打开后会直接进入这一局。</p>
+        <div class="button-stack">
+          <button class="primary" id="shareLinkButton">发给 TA</button>
+          <button class="secondary" id="previewButton">我先试玩</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen intro-screen" id="introScreen" hidden>
+      <div class="mini-board" aria-hidden="true">
+        <span>●</span><span>◆</span><span>✦</span><span>▲</span><span>＋</span>
+        <span>◆</span><span>✦</span><span>▲</span><span>＋</span><span>●</span>
+        <span>✦</span><span>▲</span><span>＋</span><span>●</span><span>◆</span>
+      </div>
+      <p class="intro-kicker">一局专属消消乐</p>
+      <h2 class="intro-title" id="introTitle">给 TA 藏了一句话</h2>
+      <p class="intro-copy">消除进度满格后，它就会出现。</p>
+      <button class="primary" id="startButton">开始消除</button>
+    </section>
+
+    <section class="screen game-screen" id="gameScreen" hidden>
+      <header class="game-header">
+        <h2 class="game-title" id="gameTitle">给 TA 的关卡</h2>
+        <button class="reset-button" id="resetButton" aria-label="重新开始" title="重新开始"><span>↻</span></button>
+      </header>
+
+      <div class="progress-row">
+        <div class="progress-track" aria-hidden="true"><div class="progress-fill" id="progressFill"></div></div>
+        <div class="progress-text" id="progressText">0 / 48</div>
+      </div>
+
+      <div class="board-wrap">
+        <div class="board" id="board" role="grid" aria-label="消消乐棋盘"></div>
+      </div>
+
+      <footer class="game-footer">
+        <span>点选两个相同图案即可消除</span>
+        <span class="moves">步数 <span id="movesValue">0</span></span>
+      </footer>
+    </section>
+
+    <section class="screen result-screen" id="resultScreen" hidden>
+      <div class="petal-layer" aria-hidden="true">
+        <span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span>
+      </div>
+      <div class="rose-decor rose-left" aria-hidden="true">🌹</div>
+      <div class="rose-decor rose-right" aria-hidden="true">🌹</div>
+      <p class="result-kicker">只给你看的话</p>
+      <h2 class="result-title" id="resultTitle">写给 TA</h2>
+      <div class="result-message" id="resultMessage"></div>
+      <p class="result-note" id="resultNote">有些话慢慢说，反而更认真。</p>
+      <div class="button-stack">
+        <button class="primary" id="shareResultButton">把这份心意分享出去</button>
+        <button class="secondary" id="playAgainButton">再玩一次</button>
+        <button class="text-button" id="makeOwnButton">我也藏一句话</button>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const SIZE = 6;
+      const TYPE_COUNT = 6;
+      const SYMBOLS = ["●", "◆", "✦", "▲", "＋", "■"];
+      const TYPE_NAMES = ["红色圆点", "青色菱形", "黄色星形", "蓝色三角", "绿色加号", "粉色方块"];
+      const screens = {
+        creator: document.getElementById("creatorScreen"),
+        intro: document.getElementById("introScreen"),
+        game: document.getElementById("gameScreen"),
+        result: document.getElementById("resultScreen")
+      };
+
+      const boardElement = document.getElementById("board");
+      const messageInput = document.getElementById("messageInput");
+      const nameInput = document.getElementById("nameInput");
+      const shareReady = document.getElementById("shareReady");
+      const toast = document.getElementById("toast");
+      const progressFill = document.getElementById("progressFill");
+      const progressText = document.getElementById("progressText");
+      const movesValue = document.getElementById("movesValue");
+
+      let config = { message: "李品月 我爱你 我们是夫妻 我绝对会娶你", recipient: "李品月" };
+      let shareUrl = "";
+      let grid = [];
+      let selected = null;
+      let busy = false;
+      let moves = 0;
+      let cleared = 0;
+      let target = SIZE * SIZE;
+      let lastMatched = new Set();
+      let removed = new Set();
+
+      const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+      function showScreen(name) {
+        Object.entries(screens).forEach(([key, element]) => {
+          element.hidden = key !== name;
+        });
+        window.scrollTo({ top: 0, behavior: "instant" });
+      }
+
+      function cleanMessage(value) {
+        return value.replace(/[\r\n\t]+/g, " ").replace(/\s{2,}/g, " ").trim().slice(0, 24);
+      }
+
+      function cleanName(value) {
+        return value.replace(/[\r\n\t]+/g, " ").trim().slice(0, 8) || "TA";
+      }
+
+      function messageCharacters() {
+        return Array.from(config.message);
+      }
+
+      function setConfig(message, recipient) {
+        const cleaned = cleanMessage(message);
+        if (!cleaned) throw new Error("先写下一句话");
+        config = { message: cleaned, recipient: cleanName(recipient) };
+        target = SIZE * SIZE;
+        document.getElementById("introTitle").textContent = `给 ${config.recipient} 藏了一句话`;
+        document.getElementById("gameTitle").textContent = `给 ${config.recipient} 的关卡`;
+        document.getElementById("resultTitle").textContent = `写给 ${config.recipient}`;
+        document.getElementById("resultMessage").textContent = config.message;
+      }
+
+      function buildUrl() {
+        const params = new URLSearchParams();
+        params.set("m", config.message);
+        params.set("n", config.recipient);
+        return `${location.origin}${location.pathname}#${params.toString()}`;
+      }
+
+      function loadFromHash() {
+        const params = new URLSearchParams(location.hash.replace(/^#/, ""));
+        const message = params.get("m");
+        if (!message) return false;
+        try {
+          setConfig(message, params.get("n") || "TA");
+          shareUrl = location.href;
+          showScreen("intro");
+          return true;
+        } catch (_) {
+          return false;
+        }
+      }
+
+      function showToast(text) {
+        toast.textContent = text;
+        toast.classList.add("show");
+        clearTimeout(showToast.timer);
+        showToast.timer = setTimeout(() => toast.classList.remove("show"), 2200);
+      }
+
+      async function copyText(text) {
+        try {
+          await navigator.clipboard.writeText(text);
+          return true;
+        } catch (_) {
+          const field = document.createElement("textarea");
+          field.value = text;
+          field.setAttribute("readonly", "");
+          field.style.position = "fixed";
+          field.style.opacity = "0";
+          document.body.appendChild(field);
+          field.select();
+          const ok = document.execCommand("copy");
+          field.remove();
+          return ok;
+        }
+      }
+
+      async function shareGame(resultMode = false) {
+        const url = shareUrl || buildUrl();
+        const text = resultMode
+          ? `我消出了这句话：${config.message}`
+          : `${config.recipient}，有一句话藏在消消乐里，等你来发现。`;
+        if (navigator.share) {
+          try {
+            await navigator.share({ title: "藏话消消乐", text, url });
+            return;
+          } catch (error) {
+            if (error && error.name === "AbortError") return;
+          }
+        }
+        const copied = await copyText(`${text}\n${url}`);
+        showToast(copied ? "链接已复制，可以粘贴到微信" : "长按浏览器地址复制链接");
+      }
+
+      function createShareLink() {
+        try {
+          setConfig(messageInput.value, nameInput.value);
+          shareUrl = buildUrl();
+          history.replaceState(null, "", shareUrl);
+          shareReady.hidden = false;
+          shareReady.scrollIntoView({ behavior: "smooth", block: "nearest" });
+          return shareUrl;
+        } catch (error) {
+          showToast(error.message);
+          messageInput.focus();
+          return null;
+        }
+      }
+
+      function shuffle(values) {
+        for (let index = values.length - 1; index > 0; index--) {
+          const other = Math.floor(Math.random() * (index + 1));
+          [values[index], values[other]] = [values[other], values[index]];
+        }
+        return values;
+      }
+
+      function generateBoard() {
+        const values = [];
+        for (let type = 0; type < TYPE_COUNT; type++) {
+          for (let count = 0; count < SIZE; count++) values.push(type);
+        }
+        return shuffle(values);
+      }
+
+      function renderBoard() {
+        const fragment = document.createDocumentFragment();
+        grid.forEach((type, index) => {
+          const tile = document.createElement("button");
+          tile.className = "tile";
+          if (selected === index) tile.classList.add("selected");
+          if (lastMatched.has(index)) tile.classList.add("matched");
+          if (removed.has(index)) {
+            tile.classList.add("removed");
+            tile.disabled = true;
+            tile.setAttribute("aria-hidden", "true");
+          }
+          tile.dataset.index = String(index);
+          tile.dataset.type = String(type);
+          tile.setAttribute("role", "gridcell");
+          tile.setAttribute("aria-label", `${TYPE_NAMES[type]}，第 ${Math.floor(index / SIZE) + 1} 行第 ${index % SIZE + 1} 列`);
+          tile.textContent = SYMBOLS[type];
+          tile.addEventListener("click", () => handleTile(index));
+          fragment.appendChild(tile);
+        });
+        boardElement.replaceChildren(fragment);
+      }
+
+      function updateProgress() {
+        const progress = Math.min(1, cleared / target);
+        progressFill.style.width = `${Math.round(progress * 100)}%`;
+        progressText.textContent = `${Math.min(cleared, target)} / ${target}`;
+        movesValue.textContent = String(moves);
+      }
+
+      function startGame() {
+        grid = generateBoard();
+        selected = null;
+        busy = false;
+        moves = 0;
+        cleared = 0;
+        lastMatched = new Set();
+        removed = new Set();
+        renderBoard();
+        updateProgress();
+        showScreen("game");
+      }
+
+      async function handleTile(index) {
+        if (busy || removed.has(index)) return;
+        if (selected == null) {
+          selected = index;
+          renderBoard();
+          return;
+        }
+        if (selected === index) {
+          selected = null;
+          renderBoard();
+          return;
+        }
+        const first = selected;
+        selected = null;
+        busy = true;
+        moves++;
+
+        if (grid[first] !== grid[index]) {
+          boardElement.classList.add("shake");
+          renderBoard();
+          updateProgress();
+          await wait(260);
+          boardElement.classList.remove("shake");
+          showToast("图案不同，再选两个相同的");
+          busy = false;
+          return;
+        }
+
+        lastMatched = new Set([first, index]);
+        renderBoard();
+        await wait(470);
+        removed.add(first);
+        removed.add(index);
+        cleared += 2;
+        lastMatched = new Set();
+        renderBoard();
+        updateProgress();
+
+        if (cleared >= target) {
+          await wait(380);
+          finishGame();
+          return;
+        }
+        busy = false;
+      }
+
+      function finishGame() {
+        busy = false;
+        const resultMessage = document.getElementById("resultMessage");
+        const parts = config.message.split(/\s+/);
+        const lines = parts.length >= 4
+          ? [parts[0], parts.slice(1, -1).join("　"), parts[parts.length - 1]]
+          : parts;
+        resultMessage.setAttribute("aria-label", config.message);
+        resultMessage.replaceChildren(...lines.map((part) => {
+          const line = document.createElement("span");
+          line.textContent = part;
+          return line;
+        }));
+        document.getElementById("resultNote").textContent = `${moves} 步之后，这句话终于来到你面前。`;
+        showScreen("result");
+      }
+
+      function registerWebMcp() {
+        const context = document.modelContext;
+        if (!context || typeof context.registerTool !== "function") return;
+        const lifecycle = new AbortController();
+        try {
+          Promise.resolve(context.registerTool({
+            name: "create_couple_match3_link",
+            title: "生成情侣消消乐",
+            description: "把一句短话和称呼写入当前消消乐，并生成可分享的专属链接。",
+            inputSchema: {
+              type: "object",
+              properties: {
+                message: { type: "string", minLength: 1, maxLength: 24 },
+                recipient: { type: "string", minLength: 1, maxLength: 8 }
+              },
+              required: ["message", "recipient"],
+              additionalProperties: false
+            },
+            annotations: { readOnlyHint: false, untrustedContentHint: false },
+            execute(input) {
+              if (!input || typeof input.message !== "string" || typeof input.recipient !== "string") {
+                throw new Error("message 和 recipient 必须是文字");
+              }
+              setConfig(input.message, input.recipient);
+              messageInput.value = config.message;
+              nameInput.value = config.recipient;
+              shareUrl = buildUrl();
+              history.replaceState(null, "", shareUrl);
+              shareReady.hidden = false;
+              showScreen("creator");
+              return { url: shareUrl, message: config.message, recipient: config.recipient };
+            }
+          }, { signal: lifecycle.signal })).catch(() => {});
+        } catch (_) {}
+      }
+
+      document.getElementById("createButton").addEventListener("click", createShareLink);
+      document.getElementById("shareLinkButton").addEventListener("click", () => shareGame(false));
+      document.getElementById("previewButton").addEventListener("click", () => showScreen("intro"));
+      document.getElementById("startButton").addEventListener("click", startGame);
+      document.getElementById("resetButton").addEventListener("click", startGame);
+      document.getElementById("shareResultButton").addEventListener("click", () => shareGame(true));
+      document.getElementById("playAgainButton").addEventListener("click", startGame);
+      document.getElementById("makeOwnButton").addEventListener("click", () => {
+        history.replaceState(null, "", location.pathname);
+        shareReady.hidden = true;
+        showScreen("creator");
+      });
+
+      window.addEventListener("hashchange", loadFromHash);
+      registerWebMcp();
+      if (!loadFromHash()) showScreen("creator");
+    })();
+  </script>
+</body>
+</html>
